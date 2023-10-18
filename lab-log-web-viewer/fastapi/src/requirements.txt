@@ -1,0 +1,5 @@
+aioredis
+fastapi
+uvicorn
+websockets
+jinja2

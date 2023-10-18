@@ -1,0 +1,69 @@
+version: "3.7"
+
+services:
+  prometheus-node-exporter:
+    image: prom/node-exporter
+    container_name: prometheus-node-exporter
+    ports:
+      - 9100:9100
+
+  prometheus-python-app:
+   container_name: prometheus-python-app
+   build:
+     context: ./apps-monitored/python-app/
+     dockerfile: Dockerfile
+   ports:
+     - 8000:8000
+
+  promotheus-server:
+    image: prom/prometheus
+    container_name: prometheus-server
+    volumes:
+      - type: bind
+        bind:
+          propagation: shared
+        source: ./prometheus-server/promotheus.yml
+        target: /etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+
+  grafana-server:
+    user: "1000"
+    image: grafana/grafana:7.3.0
+    container_name: grafana-server
+    ports:
+      - 3000:3000
+    volumes:
+      - type: bind
+        bind:
+          propagation: shared
+        source: ./grafana/grafana.ini
+        target: /etc/grafana/grafana.ini
+      - type: bind
+        bind:
+          propagation: shared
+        source: ./grafana/provisioning/dashboards/
+        target: /etc/grafana/provisioning/dashboards/
+      - type: bind
+        bind:
+          propagation: shared
+        source: ./grafana/provisioning/datasources/
+        target: /etc/grafana/provisioning/datasources/
+      - type: bind
+        bind:
+          propagation: shared
+        source: ./grafana/provisioning/dashboards-tree-json/
+        target: /etc/dashboards/dashboards-tree-json/
+
+  #  environment:
+  #     GF_RENDERING_SERVER_URL: http://grafana-image-renderer:8081/render
+  #     GF_RENDERING_CALLBACK_URL: http://grafana:3000/
+  #     GF_LOG_FILTERS: rendering:debug
+ 
+  # grafana-renderer:
+  #   image: grafana/grafana-image-renderer:2.0.0
+  #   container_name: grafana-image-renderer
+  #   expose:
+  #     - "8081"
+  #   environment:
+  #     ENABLE_METRICS: "true"

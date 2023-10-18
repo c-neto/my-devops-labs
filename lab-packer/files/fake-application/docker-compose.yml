@@ -1,0 +1,14 @@
+version: "3.3"
+
+services: 
+  nginx-a:
+    image: nginx
+    container_name: "nginx-a"
+    ports:
+      - 8080:80
+
+  nginx-b:
+    image: nginx
+    container_name: "nginx-b"
+    ports:
+      - 8081:80

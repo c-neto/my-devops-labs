@@ -1,0 +1,42 @@
+- hosts: localhost
+  connection: local
+
+  vars:
+    contracts:
+      - name: Main Org.
+        org_id: 1
+      - name: jacarei
+        org_id: 2
+      - name: sao-jose-dos-campos
+        org_id: 3
+      - name: igarata
+        org_id: 4
+    grafana:
+      url: http://127.0.0.1:3000
+      admin_user: admin
+      admin_password: admin
+
+  tasks:
+    - include_role: 
+        name: organizations
+      vars: 
+        org_id: "{{ item.org_id }}"
+        contract: "{{ item.name }}"
+      with_items: "{{ contracts }}"
+      when: item.org_id > 1
+
+    - include_role:
+        name: dashboards
+      vars: 
+        org_id: "{{ item.org_id }}"
+        contract: "{{ item.name }}"
+      with_items: "{{ contracts }}"
+      when: item.org_id > 1
+
+    - include_role:
+        name: datasources
+      vars: 
+        org_id: "{{ item.org_id }}"
+        contract: "{{ item.name }}"
+      with_items: "{{ contracts }}"
+      when: item.org_id > 1

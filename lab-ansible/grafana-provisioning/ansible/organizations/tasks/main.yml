@@ -1,0 +1,11 @@
+---
+- name: Criando organizações {{ contract }} | {{ org_id }}
+  uri:
+    url: "{{ grafana.url }}/api/orgs"
+    user: "{{ grafana.admin_user }}"
+    password: "{{ grafana.admin_password }}"
+    method: POST
+    force_basic_auth: yes
+    body_format: json
+    body:
+      name: "{{ contract }}"

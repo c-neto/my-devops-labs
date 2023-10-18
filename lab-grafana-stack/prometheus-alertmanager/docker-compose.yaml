@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    volumes:
+      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./prometheus/rules.yaml:/etc/prometheus/rules.yaml
+      
+    ports:
+      - 9090:9090
+    restart: always
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--log.level=debug'
+    volumes:
+      - ./alertmanager/pruu.yaml:/etc/alertmanager/config.yml
+      # - ./alertmanager/slack.yaml:/etc/alertmanager/config.yml
+      - ./alertmanager/templates.tmpl:/etc/alertmanager/configmaps/templates.tmpl
+    ports:
+      - 9093:9093
+    restart: always
+
+  grafana:
+    image: grafana/grafana:9.1.5
+    container_name: grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
+      - ./grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources/
+      - ./grafana/provisioning/dashboards-tree-json/:/etc/dashboards/dashboards-tree-json/
+
+  # hamara:
+  #   image: trivago/hamara
+  #   container_name: hamara
+  #   command:
+  #     - 'tail' 
+  #     - '-f'
+  #     - '/dev/null'

@@ -1,0 +1,22 @@
+# based on: https://github.com/prometheus/alertmanager/blob/main/doc/examples/simple.yml
+
+route:
+  receiver: "pager"
+  group_interval: 5s
+  # repeat_interval: 10s
+  group_by:
+    - alertname
+
+inhibit_rules:
+  - source_match:
+      exporter_down: "true"
+    target_match:
+      severity: info
+    equal:
+      - group
+
+receivers:
+  - name: "pager"
+    webhook_configs:
+      - url: https://pruu.herokuapp.com/dump/alertmanager-test
+        send_resolved: true

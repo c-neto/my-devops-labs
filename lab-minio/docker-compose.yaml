@@ -1,0 +1,24 @@
+version: "3.7"
+
+services:
+    server-minio:
+        image: minio/minio
+        container_name: server-minio
+        ports:
+            - 9000:9000
+        volumes: 
+            - "/mnt/data:/data:rw"
+        command: server /data
+        environment: 
+            - MINIO_ACCESS_KEY=adminadmin
+            - MINIO_SECRET_KEY=adminadmin
+            - MINIO_STORAGE_USE_HTTPS=False
+    client-python:
+        image: python:3.7
+        container_name: client-minio
+        build: 
+            context: python-client
+            dockerfile: Dockerfile
+        environment: 
+            - MINIO_ACCESS_KEY=adminadmin
+            - MINIO_SECRET_KEY=adminadmin

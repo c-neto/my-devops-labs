@@ -1,0 +1,51 @@
+{{ define "devops.slack.title" }} {{ end }}
+
+{{ define "__mention_channel_members_if_alert_is_critical" }}
+  {{- if eq (index .Alerts 0).Labels.severity "critical" }}
+    {{- ":alert: <!here>" }}
+  {{- else }}
+    {{- ":alert-blue:" }}
+
+{{ define "devops.slack.footer" }}
+  {{- "Severity:" }} {{ "`"}}{{ (index .Alerts 0).Labels.severity }}{{ "`"}}
+{{ end }}
+
+{{ define "devops.slack.color" }}
+  {{- if eq .Status "firing" }}
+    {{- if eq (index .Alerts 0).Labels.severity "warning" }}
+      {{- "warning" }}
+    {{- else if eq (index .Alerts 0).Labels.severity "critical" }}
+      {{- "danger" }}
+    {{- else }}
+      {{- "#439FE0" }}
+
+{{ define "devops.slack.text" }}
+  {{- if eq .Status "firing" }}
+    {{- "*" }}{{ (index .Alerts 0).Labels.team }}{{ "*" }} {{ "|" }} {{ template "__mention_channel_members_if_alert_is_critical" . }}
+    {{- "\n"}}
+    {{- "\n"}}
+    {{- "The Alert Rule" }} {{ "`"}}{{ (index .Alerts 0).Labels.alertname }}{{ "`"}} {{ "is on *Firing* status" }}
+  {{- else }}
+    {{- "*" }}{{ (index .Alerts 0).Labels.team }}{{ "*" }} {{ "| :white_check_mark:" }}
+    {{- "\n"}}
+    {{- "\n"}}
+    {{- "The Alert Rule" }} {{ "`"}}{{ (index .Alerts 0).Labels.alertname }}{{ "`"}} {{ "was *Resolved*." }}
+  {{- end }}
+  {{- if (index .Alerts 0).Annotations.summary }}
+  {{- range .Alerts }}
+    {{- if .Annotations.deion }}
+      {{- "\n" }}
+      {{- "---" }}
+      {{- "\n" }}
+      {{- .Annotations.deion }}
+    {{- end }}
+  {{- ">" }} {{ "Alerts Common Labels:" }}
+  {{- "\n" }}
+  {{- range .CommonLabels.SortedPairs }}
+    {{- ">" }} {{- "»" }} {{ .Name }} {{ "`"}}{{ .Value }}{{ "`"}}
+    {{- "\n" }}
+  {{- end }}
+  {{- "\n" }}
+  {{- "\n" }}
+  {{- "---" }}
+{{- end }}

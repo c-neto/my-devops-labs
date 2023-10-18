@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  # https://hub.docker.com/_/haproxy
+  haproxy:
+    image: haproxy:2.4.0-alpine
+    container_name: haproxy
+    environment: 
+      - LOG_LEVEL=DEBUG
+    sysctls: 
+      - net.ipv4.ip_unprivileged_port_start=0
+    volumes: 
+      - ./haproxy/:/usr/local/etc/haproxy/
+    ports: 
+      - 5000:5000
+  
+  ws-a:
+    image: nginx
+    container_name: ws-a
+    volumes: 
+      - ./ws-a/index.html:/usr/share/nginx/html/index.html
+    ports:
+      - 8080:80
+
+  ws-b:
+    image: nginx
+    container_name: ws-b
+    volumes: 
+      - ./ws-b/index.html:/usr/share/nginx/html/index.html  
+    ports:
+      - 8081:80
+
+  ws-default:
+    image: nginx
+    container_name: ws-default
+    volumes: 
+      - ./ws-default/index.html:/usr/share/nginx/html/index.html
+    ports:
+      - 8082:80

@@ -1,0 +1,12 @@
+groups:
+  - name: MockAlertsFromPrometheusRules
+    rules:
+      - alert: mock_alerts_from_prometheus_rules
+        expr: go_gc_duration_seconds >= 0
+        for: 0s
+        labels:
+          group: devops
+          severity: critical
+        annotations:
+          summary: "summary exporter down: {{ $labels }}"
+          description: "description test description: {{ $labels }}"

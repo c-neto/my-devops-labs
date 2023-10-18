@@ -1,0 +1,30 @@
+---
+- name: Lendo variaveis
+  include_vars: "{{ contract }}.yml"
+
+- name: Mudando o contexto de configuração de organização
+  uri:
+    url: "{{ grafana.url }}/api/user/using/{{ org_id }}"
+    user: "{{ grafana.admin_user }}"
+    password: "{{ grafana.admin_password }}"
+    method: POST
+    force_basic_auth: yes
+
+- name: Gerando dashboard
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "dashboards/files/"
+  with_fileglob:
+    - "dashboards/templates/*"
+
+- name: Criando Dashboards
+  uri:
+    url: "{{ grafana.url }}/api/dashboards/db"
+    user: "{{ grafana.admin_user }}"
+    password: "{{ grafana.admin_password }}"
+    method: POST
+    force_basic_auth: yes
+    body_format: json
+    src: "{{ item }}"
+  with_fileglob:
+    - "dashboards/files/*"

@@ -1,0 +1,35 @@
+version: "3.7"
+
+
+services:
+  ws-server:
+    build: 
+      context: ./ws-server
+      dockerfile: Dockerfile
+    container_name: ws-server
+    volumes:
+      - ./ws-server/logs/ws-server.log:/var/log/ws-server.log
+
+  ws-client:
+    depends_on:
+      - nginx
+    build:
+      context: ./ws-client
+      dockerfile: Dockerfile
+    container_name: ws-client
+    volumes:
+      - ./ws-client/logs/ws-client.log:/var/log/ws-client.log
+
+  nginx:
+    depends_on: 
+      - ws-server
+    image: nginx:1.17.10-alpine
+    container_name: nginx
+    command: sh /root/nginx-watch.sh
+    ports:
+      - 8081:8081
+    volumes:
+      - "./nginx/nginx-watch.sh:/root/nginx-watch.sh"
+      - "./nginx/config/nginx.conf:/etc/nginx/nginx.conf"
+      - "./nginx/config/conf.d:/etc/nginx/conf.d/"
+      - "./nginx/logs:/var/log/nginx/"

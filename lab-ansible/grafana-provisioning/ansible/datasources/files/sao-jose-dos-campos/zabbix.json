@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "name": "zabbix",
+  "type": "alexanderzobnin-zabbix-datasource",
+  "access": "proxy",
+  "url": "",
+  "withCredentials": true,
+  "jsonData": {
+    "addThresholds": false,
+    "alerting": false,
+    "alertingMinSeverity": 3,
+    "dbConnectionDatasourceId": null,
+    "dbConnectionEnable": false,
+    "disableReadOnlyUsersAck": true,
+    "password": "",
+    "trends": true,
+    "username": "",
+    "zabbixVersion": 4
+  }
+}

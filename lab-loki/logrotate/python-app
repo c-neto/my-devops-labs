@@ -1,0 +1,13 @@
+/var/lib/docker/volumes/pipeline-logs-loki_app-logs/_data/*log{
+    # Rotaciona os ultimos 30 arquivos rotacionados
+    rotate 30
+
+    # Copia os arquivos para ser comprimidos e rotacionados
+    copytruncate
+
+    # Comprime os arquivos rotacionados
+    compress
+
+    # Move os arquivos rotacionados para o diretorio indicado
+    olddir /var/lib/docker/volumes/pipeline-logs-loki_app-logs/_data
+}

@@ -1,0 +1,31 @@
+# dynamic configuration
+http:
+  routers:
+    api:
+      rule: "Host(`traefik.localhost`)"
+      service: api@internal
+      entryPoints:
+        - internal-apps
+
+    grafana:
+      rule: "Host(`grafana.localhost`)"
+      tls: false
+      service: lb-grafana
+      entryPoints:
+        - internal-apps
+      middlewares:
+        - "auth"
+
+  middlewares:
+    auth:
+      forwardAuth:
+        address: "http://auth-server:8090/"
+        authResponseHeaders:
+          - "X-Auth-User"
+          - "X-Secret"
+
+  services:
+    lb-grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000/"

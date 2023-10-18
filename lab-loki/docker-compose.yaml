@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  python-app:
+    container_name: python-app
+    build: 
+      context: python-app
+    volumes: 
+      - app-logs:/logs/
+
+  loki:
+    image: grafana/loki:2.0.0
+    container_name: loki
+    command: 
+      - -config.file=/etc/loki/local-config.yaml
+      - -print-config-stderr=true
+    expose: 
+      - 3100
+
+  promtail:
+    image: grafana/promtail:2.1.0
+    container_name: promtail
+    command: 
+      - '-config.file=/etc/promtail/config.yml'
+      - '-config.expand-env=true'
+    environment: 
+      - HOST=py-app
+    volumes: 
+      - /var/log:/data/var/log
+      - ./promtail/config.yaml:/etc/promtail/config.yml
+      - app-logs:/logs
+      - promtail-storage:/position/
+    ports:
+      - 9080:9080
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - 3000:3000
+    volumes: 
+      - grafana:/var/lib/grafana
+
+volumes: 
+  grafana:
+  app-logs:
+  promtail-storage:
