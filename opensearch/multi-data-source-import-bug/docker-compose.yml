@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+  opensearch-dashboards:
+    container_name: opensearch-dashboards.lab
+    image: opensearchproject/opensearch-dashboards:2.8.0
+    volumes:
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+      - ./_certs/root-ca.pem:/usr/share/opensearch-dashboards/config/root-ca.pem
+      - ./_certs/opensearch-dashboards-key.pem:/usr/share/opensearch-dashboards/config/opensearch-dashboards-key.pem
+      - ./_certs/opensearch-dashboards.pem:/usr/share/opensearch-dashboards/config/opensearch-dashboards.pem
+    ports:
+      - 5601:5601
+    environment:
+      NODE_EXTRA_CA_CERTS: /usr/share/opensearch-dashboards/config/root-ca.pem
+
+  opensearch-main:
+    container_name: opensearch-main.lab
+    image: opensearchproject/opensearch:2.8.0
+    volumes:
+      - ./opensearch-main/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./_certs/node-main.pem:/usr/share/opensearch/config/node-main.pem
+      - ./_certs/node-main-key.pem:/usr/share/opensearch/config/node-main-key.pem
+      - ./_certs/root-ca.pem:/usr/share/opensearch/config/root-ca.pem
+    ports:
+      - 9200:9200
+    environment:
+      OPENSEARCH_JAVA_OPTS: -Xms128m -Xmx128m
+
+  opensearch-secondary:
+    container_name: opensearch-secondary.lab
+    image: opensearchproject/opensearch:2.8.0
+    volumes:
+      - ./opensearch-secondary/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./_certs/node-secondary.pem:/usr/share/opensearch/config/node-secondary.pem
+      - ./_certs/node-secondary-key.pem:/usr/share/opensearch/config/node-secondary-key.pem
+      - ./_certs/root-ca.pem:/usr/share/opensearch/config/root-ca.pem
+    ports:
+      - 9202:9200
+    environment:
+      OPENSEARCH_JAVA_OPTS: -Xms128m -Xmx128m

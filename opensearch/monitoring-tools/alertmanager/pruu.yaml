@@ -1,0 +1,9 @@
+route:
+  receiver: "pager"
+  repeat_interval: 10s
+
+receivers:
+  - name: "pager"
+    webhook_configs:
+      - url: https://pruu.herokuapp.com/dump/augustoliks-lab-opensearch
+        send_resolved: true

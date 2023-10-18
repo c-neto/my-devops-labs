@@ -1,0 +1,21 @@
+cluster.name: lab-secondary
+discovery.type: single-node
+network.host: 0.0.0.0
+
+plugins.security.allow_default_init_securityindex: true
+
+plugins.security.ssl.transport.pemcert_filepath: node-secondary.pem
+plugins.security.ssl.transport.pemkey_filepath: node-secondary-key.pem
+plugins.security.ssl.transport.pemtrustedcas_filepath: root-ca.pem
+plugins.security.ssl.transport.enforce_hostname_verification: false
+
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemcert_filepath: node-secondary.pem
+plugins.security.ssl.http.pemkey_filepath: node-secondary-key.pem
+plugins.security.ssl.http.pemtrustedcas_filepath: root-ca.pem
+
+plugins.security.authcz.admin_dn:
+  - 'CN=admin'
+
+plugins.security.nodes_dn:
+  - 'CN=opensearch-secondary.lab,OU=FakeOrganizationUnit,O=FakeOrganization,L=FakeL,ST=FakeST,C=BR'

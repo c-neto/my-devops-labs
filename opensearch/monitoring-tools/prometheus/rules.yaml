@@ -1,0 +1,326 @@
+groups:
+  # https://github.com/prometheus-community/elasticsearch_exporter/blob/master/examples/prometheus/elasticsearch.rules.yml
+  - name: https://github.com/prometheus-community/elasticsearch_exporter/blob/master/examples/prometheus/elasticsearch.rules.yml
+    rules:
+      - alert: ElasticsearchTooFewNodesRunning
+        expr: elasticsearch_cluster_health_number_of_nodes < 3
+        for: 5m
+        annotations:
+          description: "There are only {{ $value }} < 3 ElasticSearch nodes running"
+          summary: ElasticSearch running on less than 3 nodes
+        labels:
+          severity: critical
+
+      - alert: ElasticsearchHeapTooHigh
+        expr: elasticsearch_heap_utilization_percentage > 90
+        for: 15m
+        annotations:
+          description: The heap usage is over 90% for 15m
+          summary: "ElasticSearch node {{ $labels.name }} heap usage is high"
+        labels:
+          severity: critical
+
+      - alert: ElasticsearchClusterNotHealthy
+        expr: elasticsearch_red_cluster_status
+        for: 2m
+        annotations:
+          message: "Cluster {{ $labels.cluster }} health status has been RED for at least 2m. Cluster does not accept writes, shards may be missing or master node hasn't been elected yet."
+          summary: Cluster health status is RED
+        labels:
+          severity: critical
+
+      - alert: ElasticsearchClusterNotHealthy
+        expr: elasticsearch_yellow_cluster_status
+        for: 20m
+        annotations:
+          message: "Cluster {{ $labels.cluster }} health status has been YELLOW for at least 20m. Some shard replicas are not allocated."
+          summary: Cluster health status is YELLOW
+        labels:
+          severity: warning
+
+      - alert: ElasticsearchNodeDiskWatermarkReached
+        expr: elasticsearch_node_disk_watermark_reached > 85
+        for: 5m
+        annotations:
+          message: "Disk Low Watermark Reached at {{ $labels.node }} node in {{ $labels.cluster }} cluster. Shards can not be allocated to this node anymore. You should consider adding more disk to the node."
+          summary: "Disk Low Watermark Reached - disk saturation is {{ $value }}%"
+        labels:
+          severity: warning
+
+      - alert: ElasticsearchNodeDiskWatermarkReached
+        expr: elasticsearch_node_disk_watermark_reached > 90
+        for: 5m
+        annotations:
+          message: "Disk High Watermark Reached at {{ $labels.node }} node in {{ $labels.cluster }} cluster. Some shards will be re-allocated to different nodes if possible. Make sure more disk space is added to the node or drop old indices allocated to this node."
+          summary: "Disk High Watermark Reached - disk saturation is {{ $value }}%"
+        labels:
+          severity: critical
+
+      - alert: ElasticsearchJVMHeapUseHigh
+        expr: elasticsearch_heap_utilization_percentage > 75
+        for: 10m
+        annotations:
+          message: "JVM Heap usage on the node {{ $labels.node }} in {{ $labels.cluster }} cluster is {{ $value }}%."
+          summary: JVM Heap usage on the node is high
+        labels:
+          severity: critical
+
+      - alert: SystemCPUHigh
+        expr: elasticsearch_os_cpu_high > 90
+        for: 1m
+        annotations:
+          message: "System CPU usage on the node {{ $labels.node }} in {{ $labels.cluster }} cluster is {{ $value }}%"
+          summary: System CPU usage is high
+        labels:
+          severity: critical
+
+      - alert: ElasticsearchProcessCPUHigh
+        expr: elasticsearch_process_cpu_high > 90
+        for: 1m
+        annotations:
+          message: "ES process CPU usage on the node {{ $labels.node }} in {{ $labels.cluster }} cluster is {{ $value }}%"
+          summary: ES process CPU usage is high
+        labels:
+          severity: critical
+
+  # https://awesome-prometheus-alerts.grep.to/rules.html#elasticsearch-1
+  - name: "https://awesome-prometheus-alerts.grep.to/rules.html#elasticsearch-1"
+    rules:
+      - alert: ElasticsearchHeapUsageTooHigh
+        expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Elasticsearch Heap Usage Too High (instance {{ $labels.instance }})
+          description: "The heap usage is over 90%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchHeapUsageWarning
+        expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elasticsearch Heap Usage warning (instance {{ $labels.instance }})
+          description: "The heap usage is over 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchDiskOutOfSpace
+        expr: elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes * 100 < 10
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Elasticsearch disk out of space (instance {{ $labels.instance }})
+          description: "The disk usage is over 90%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchDiskSpaceLow
+        expr: elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes * 100 < 20
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elasticsearch disk space low (instance {{ $labels.instance }})
+          description: "The disk usage is over 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchClusterRed
+        expr: elasticsearch_cluster_health_status{color="red"} == 1
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Elasticsearch Cluster Red (instance {{ $labels.instance }})
+          description: "Elastic Cluster Red status\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchClusterYellow
+        expr: elasticsearch_cluster_health_status{color="yellow"} == 1
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elasticsearch Cluster Yellow (instance {{ $labels.instance }})
+          description: "Elastic Cluster Yellow status\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchHealthyNodes
+        expr: elasticsearch_cluster_health_number_of_nodes < 3
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Elasticsearch Healthy Nodes (instance {{ $labels.instance }})
+          description: "Missing node in Elasticsearch cluster\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchHealthyDataNodes
+        expr: elasticsearch_cluster_health_number_of_data_nodes < 3
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Elasticsearch Healthy Data Nodes (instance {{ $labels.instance }})
+          description: "Missing data node in Elasticsearch cluster\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchRelocatingShards
+        expr: elasticsearch_cluster_health_relocating_shards > 0
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: Elasticsearch relocating shards (instance {{ $labels.instance }})
+          description: "Elasticsearch is relocating shards\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchRelocatingShardsTooLong
+        expr: elasticsearch_cluster_health_relocating_shards > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elasticsearch relocating shards too long (instance {{ $labels.instance }})
+          description: "Elasticsearch has been relocating shards for 15min\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchInitializingShards
+        expr: elasticsearch_cluster_health_initializing_shards > 0
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: Elasticsearch initializing shards (instance {{ $labels.instance }})
+          description: "Elasticsearch is initializing shards\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchInitializingShardsTooLong
+        expr: elasticsearch_cluster_health_initializing_shards > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elasticsearch initializing shards too long (instance {{ $labels.instance }})
+          description: "Elasticsearch has been initializing shards for 15 min\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchUnassignedShards
+        expr: elasticsearch_cluster_health_unassigned_shards > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: Elasticsearch unassigned shards (instance {{ $labels.instance }})
+          description: "Elasticsearch has unassigned shards\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchPendingTasks
+        expr: elasticsearch_cluster_health_number_of_pending_tasks > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elasticsearch pending tasks (instance {{ $labels.instance }})
+          description: "Elasticsearch has pending tasks. Cluster works slowly.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+      - alert: ElasticsearchNoNewDocuments
+        expr: increase(elasticsearch_indices_docs{es_data_node="true"}[10m]) < 1
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elasticsearch no new documents (instance {{ $labels.instance }})
+          description: "No new documents for 10 min!\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+
+  # https://github.com/dcos/prometheus-alert-rules/blob/master/rules/elasticsearch/elasticsearch.yml
+  - name: https://github.com/dcos/prometheus-alert-rules/blob/master/rules/elasticsearch/elasticsearch.yml
+    rules:
+      - alert: Elastic_UP
+        expr: elasticsearch_up{job="elasticsearch"} != 1
+        for: 2m
+        labels:
+          severity: alert
+          value: '{{$value}}'
+        annotations:
+          description: This server's Elasticsearch instance status has a value of {{ $value }}.
+          summary: 'Instance {{ $labels.instance }}: Elasticsearch instance status is not 1'
+      - alert: Elastic_Cluster_Health_RED
+        expr: elasticsearch_cluster_health_status{color="red"} == 1
+        for: 5m
+        labels:
+          severity: alert
+          value: '{{$value}}'
+        annotations:
+          description: 'Instance {{ $labels.instance }}: not all primary and replica shards are allocated in elasticsearch cluster {{ $labels.cluster }}.'
+          summary: 'Instance {{ $labels.instance }}: not all primary and replica shards are allocated in elasticsearch cluster {{ $labels.cluster }}'
+      - alert: Elastic_Cluster_Health_Yellow
+        expr: elasticsearch_cluster_health_status{color="yellow"} == 1
+        for: 5m
+        labels:
+          severity: alert
+          value: '{{$value}}'
+        annotations:
+          description: 'Instance {{ $labels.instance }}: not all primary and replica shards are allocated in elasticsearch cluster {{ $labels.cluster }}.'
+          summary: 'Instance {{ $labels.instance }}: not all primary and replica shards are allocated in elasticsearch cluster {{ $labels.cluster }}'
+      - alert: Elasticsearch_JVM_Heap_Too_High
+        expr: elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"} > 0.8
+        for: 15m
+        labels:
+          severity: alert
+          value: '{{$value}}'
+        annotations:
+          description: The heap in {{ $labels.instance }} is over 80% for 15m.
+          summary: ElasticSearch node {{ $labels.instance }} heap usage is high
+      - alert: Elasticsearch_health_up
+        expr: elasticsearch_cluster_health_up != 1
+        for: 1m
+        labels:
+          severity: alert
+          value: '{{$value}}'
+        annotations:
+          description: 'ElasticSearch node: {{ $labels.instance }} last scrape of the ElasticSearch cluster health failed'
+          summary: 'ElasticSearch node: {{ $labels.instance }} last scrape of the ElasticSearch cluster health failed'
+      - alert: Elasticsearch_Too_Few_Nodes_Running
+        expr: elasticsearch_cluster_health_number_of_nodes < 3
+        for: 5m
+        labels:
+          severity: alert
+          value: '{{$value}}'
+        annotations:
+          description: There are only {{$value}} < 3 ElasticSearch nodes running
+          summary: ElasticSearch running on less than 3 nodes
+      - alert: Elasticsearch_Count_of_JVM_GC_Runs
+        expr: rate(elasticsearch_jvm_gc_collection_seconds_count[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          value: '{{$value}}'
+        annotations:
+          description: 'ElasticSearch node {{ $labels.instance }}: Count of JVM GC runs > 5 per sec and has a value of {{ $value }}'
+          summary: 'ElasticSearch node {{ $labels.instance }}: Count of JVM GC runs > 5 per sec and has a value of {{ $value }}'
+      - alert: Elasticsearch_GC_Run_Time
+        expr: rate(elasticsearch_jvm_gc_collection_seconds_sum[5m]) > 0.3
+        for: 1m
+        labels:
+          severity: warning
+          value: '{{$value}}'
+        annotations:
+          description: 'ElasticSearch node {{ $labels.instance }}: GC run time in seconds 0 > 0.3 sec and has a value of {{ $value }}'
+          summary: 'ElasticSearch node {{ $labels.instance }}: GC run time in seconds > 0.3 sec and has a value of {{ $value }}'
+      - alert: Elasticsearch_json_parse_failures
+        expr: elasticsearch_cluster_health_json_parse_failures > 0
+        for: 1m
+        labels:
+          severity: warning
+          value: '{{$value}}'
+        annotations:
+          description: 'ElasticSearch node {{ $labels.instance }}: json parse failures > 0 and has a value of {{ $value }}'
+          summary: 'ElasticSearch node {{ $labels.instance }}: json parse failures > 0 and has a value of {{ $value }}'
+      - alert: Elasticsearch_breakers_tripped
+        expr: rate(elasticsearch_breakers_tripped[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          value: '{{$value}}'
+        annotations:
+          description: 'ElasticSearch node {{ $labels.instance }}: breakers tripped > 0 and has a value of {{ $value }}'
+          summary: 'ElasticSearch node {{ $labels.instance }}: breakers tripped > 0 and has a value of {{ $value }}'
+      - alert: Elasticsearch_health_timed_out
+        expr: elasticsearch_cluster_health_timed_out > 0
+        for: 1m
+        labels:
+          severity: warning
+          value: '{{$value}}'
+        annotations:
+          description: 'ElasticSearch node {{ $labels.instance }}: Number of cluster health checks timed out > 0 and has a value of {{ $value }}'
+          summary: 'ElasticSearch node {{ $labels.instance }}: Number of cluster health checks timed out > 0 and has a value of {{ $value }}'

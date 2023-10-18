@@ -1,0 +1,4 @@
+{ "timestamp": "2022-12-23T12:34:56Z", "level": "error", "message": "There was an error processing the request", "request_id": "1234567890", "user_id": "abcdefghij" }
+{"timestamp": "2022-12-23T12:34:56Z","level": "warning","message": "Low memory warning","free_memory": 456,"total_memory": 1024}
+{"timestamp": "2022-12-23T12:34:56Z","level": "info","message": "User logged in","user_id": "abcdefghij","user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"}
+{"timestamp": "2022-12-23T12:34:56Z","level": "debug","message": "Server starting","server_id": "abcdefghij","start_time": "2022-12-23T12:30:00Z"}

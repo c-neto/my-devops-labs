@@ -1,0 +1,50 @@
+version: "3.7"
+
+services:
+  opensearch:
+    container_name: opensearch
+    image: opensearchproject/opensearch:2.3.0
+    volumes:
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./opensearch/config/opensearch-security:/usr/share/opensearch/config/opensearch-security
+      - ./_certs/root-ca.pem:/usr/share/opensearch/config/root-ca.pem
+      - ./_certs/admin.pem:/usr/share/opensearch/config/admin.pem
+      - ./_certs/admin-key.pem:/usr/share/opensearch/config/admin-key.pem
+      - ./_certs/node.pem:/usr/share/opensearch/config/node.pem
+      - ./_certs/node-key.pem:/usr/share/opensearch/config/node-key.pem
+      # - ./logs:/usr/share/opensearch/logs/
+    ports:
+      - 9200:9200
+      - 9600:9600
+    environment:
+      TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      # node.name: opensearch
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  opensearch-dashboards:
+    container_name: opensearch-dashboards
+    image: opensearchproject/opensearch-dashboards:2.3.0
+    volumes:
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+    ports:
+      - 5601:5601
+    environment:
+      TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      LS_JAVA_OPTS: "-Xmx1g -Xms256m"
+
+  cli:
+    container_name: cli
+    image: python:3.7
+    command: tail -f /dev/null
+
+volumes:
+  opensearch:

@@ -1,0 +1,8 @@
+- pipeline.id: pipeline-1
+  path.config: "pipeline/pipeline-1.cfg"
+  pipeline.workers: 1
+
+- pipeline.id: pipeline-2
+  path.config: "pipeline/pipeline-2.cfg"
+  pipeline.workers: 1
+

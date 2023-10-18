@@ -1,0 +1,53 @@
+apiVersion: 1
+datasources:
+  - orgId: 1
+    version: 3
+    name: Alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    jsonData:
+      implementation: prometheus
+  - orgId: 1
+    version: 1
+    name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090/
+    isDefault: true
+
+  # https://grafana.com/grafana/plugins/grafana-opensearch-datasource/
+  - name: OpenSearch
+    type: grafana-opensearch-datasource
+    access: proxy
+    url: http://opensearch:9200
+    jsonData:
+      database: "[metrics-]YYYY.MM.DD"
+      interval: Daily
+      timeField: "@timestamp"
+      version: "1.0.0"
+      flavor: "opensearch"
+
+  # https://grafana.com/grafana/plugins/grafana-opensearch-datasource/
+  - name: elasticsearch-v7-filebeat
+    type: grafana-opensearch-datasource
+    access: proxy
+    url: http://opensearch:9200
+    jsonData:
+      database: "[filebeat-]YYYY.MM.DD"
+      interval: Daily
+      timeField: "@timestamp"
+      version: "7.0.0"
+      flavor: "elasticsearch"
+      logMessageField: message
+      logLevelField: fields.level
+
+  # https://grafana.com/docs/grafana/latest/datasources/elasticsearch/
+  - name: Elastic
+    type: elasticsearch
+    access: proxy
+    database: '[metrics-]YYYY.MM.DD'
+    url: http://opensearch:9200
+    jsonData:
+      interval: Daily
+      timeField: '@timestamp'
