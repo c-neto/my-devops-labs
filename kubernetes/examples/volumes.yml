@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-nginx
+spec:
+  volumes:
+    - name: "statics-dir"
+      hostPath:
+        path: /data
+  containers:
+    - name: web-server
+      image: nginx
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: "statics-dir"
+      ports:
+        - containerPort: 80
+          name: web-port
+          protocol: TCP
+ 

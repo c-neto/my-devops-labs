@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: nginx-logs-sidecar-example
+  labels:
+    name: nginx-logs-sidecar-example

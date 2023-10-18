@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuard
+spec:
+  selector:
+    matchLabels:
+      run: kuard
+  # rotate deployment objects 14 days
+  revisionHistoryLimit: 14
+  replicas: 3
+  template:
+    metadata:
+      annotations:
+        kubernetes.io/change-cause: "update to green kuard"
+      labels:
+        run: kuard
+    spec:
+      containers:
+        - name: kuard
+          image: "gcr.io/kuar-demo/kuard-amd64:green"
+          imagePullPolicy: Always

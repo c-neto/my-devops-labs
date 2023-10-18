@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docker-creds-cm
+  annotations:
+    kubernetes.io/description: |
+      B64_AUTH=$(echo -n "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" | base64)
+data:
+  config.json: |
+    {
+      "auths": {
+        "https://index.docker.io/v1/": {
+          "auth": "B64_AUTH"
+        }
+      }
+    }
