@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  logstash:
+    container_name: logstash
+    build:
+      context: logstash/
+    volumes:
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+    environment:
+      LOGSTASH_CUSTOM_PIPELINE: "{input-a,filter-a,output-json}"
+      # LOGSTASH_CUSTOM_PIPELINE: "{input-a,filter-a,filter-b,output-json,output-rubydebug}"
+      # LOGSTASH_CUSTOM_PIPELINE: "{input-a,input-b,filter-a,output-json}"
+      # LOGSTASH_CUSTOM_PIPELINE: "{input-a,input-b,filter-a,filter-b,output-json}"
+      # LOGSTASH_CUSTOM_PIPELINE: "{input-a,input-b,filter-a,filter-b,output-json,output-rubydebug}"
