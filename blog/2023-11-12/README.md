@@ -1,7 +1,6 @@
 # logstash
 
 ```bash
-├── docker-compose.yml
 ├── logstash
 │   ├── config
 │   │   ├── logstash.yml
@@ -12,8 +11,9 @@
 │       ├── filter-b.cfg
 │       ├── input-a.cfg
 │       ├── input-b.cfg
-│       ├── output-a.cfg
-│       └── output-b.cfg
+│       ├── output-json.cfg
+│       └── output-rubydebug.cfg
+├── docker-compose.yml
 └── Makefile
 ```
 
@@ -21,27 +21,15 @@
 
 The lab was created to run over `docker`. To set up container configuration use `docker-compose`.
 
-- To start the environment:
+- To setup the environment and follow up the logstash container logs.
 
 ```bash
-$ docker-compose up --build -d 
+$ make up
 ```
 
-- To check logs:
+- To destroy the environment.
 
 ```bash
-$ docker-compose logs
+$ make down
 ```
 
-- To destroy stack:
-
-```bash
-$ docker-compose logs
-```
-
-## How to Access the OpenSearch
-
-The resources can be accessed with the following links:
-
-- OpenSearch Dashboards: http://127.0.0.1:5601/
-- OpenSearch: http://127.0.0.1:9200/
