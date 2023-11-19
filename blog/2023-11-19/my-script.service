@@ -1,0 +1,10 @@
+[Unit]
+Description=My Script
+
+[Service]
+WorkingDirectory=/tmp/my-script-service/
+ExecStart=/tmp/my-script-service/my-script.sh
+EnvironmentFile=/tmp/my-script-service/env_default.env
+
+[Install]
+WantedBy=multi-user.target
