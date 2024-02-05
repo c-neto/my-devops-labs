@@ -1,0 +1,24 @@
+metricbeat.modules:
+  # - module: beat
+  #   enabled: true
+  #   period: 10s
+  #   metricsets:
+  #     - stats
+  #   hosts:
+  #     - "filebeat:5066"
+
+  - module: logstash
+    metricsets:
+      - node
+      - node_stats
+    period: 10s
+    hosts: ["logstash:9600"]
+
+
+# output.console:
+#   pretty: true
+
+
+output.logstash:
+  hosts:
+    - "logstash:5055"

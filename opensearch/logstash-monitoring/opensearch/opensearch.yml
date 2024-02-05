@@ -1,0 +1,7 @@
+cluster.name: docker-cluster
+discovery.type: single-node
+network.host: 0.0.0.0
+
+plugins.security.disabled: true
+
+compatibility.override_main_response_version: true

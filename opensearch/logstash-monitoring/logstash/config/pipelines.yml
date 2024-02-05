@@ -1,0 +1,20 @@
+- pipeline.id: fake-a
+  path.config: "pipeline/pipeline-fake.cfg"
+  pipeline.workers: 1
+
+- pipeline.id: fake-b
+  path.config: "pipeline/pipeline-fake.cfg"
+  pipeline.workers: 1
+
+# - pipeline.id: logstash-monitoring
+#   path.config: "pipeline/logstash-monitoring.cfg"
+#   pipeline.workers: 1
+
+# - pipeline.id: logstash-filebeat
+#   path.config: "pipeline/pipeline-filebeat.cfg"
+#   pipeline.workers: 1
+
+
+- pipeline.id: logstash-filebeat
+  path.config: "pipeline/mbeat-logstash.cfg"
+  pipeline.workers: 1

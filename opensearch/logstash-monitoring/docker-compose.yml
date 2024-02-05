@@ -1,0 +1,77 @@
+version: "3.7"
+
+services:
+  opensearch:
+    container_name: opensearch
+    build:
+      context: opensearch
+      args:
+        TAG_VERSION: "2.7.0"
+    volumes:
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+    ports:
+      - 9200:9200
+
+  opensearch-dashboards:
+    container_name: opensearch-dashboards
+    build:
+      context: opensearch-dashboards
+      args:
+        TAG_VERSION: "2.7.0"
+    volumes:
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+    ports:
+      - 5601:5601
+
+  logstash:
+    container_name: logstash
+    build:
+      context: logstash
+      args:
+        TAG_VERSION: "8.9.0"
+    volumes:
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+    ports:
+      - 5000:5000
+
+  filebeat:
+    container_name: filebeat
+    hostname: my-filebeat
+    build:
+      context: filebeat
+      args:
+        TAG_VERSION: "8.0.1"
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./filebeat/log:/var/log
+    ports:
+      - 5066:5066
+    environment:
+      HOSTNAME: my-hostname
+
+  metricbeat:
+    container_name: metricbeat
+    build:
+      context: metricbeat
+      args:
+        TAG_VERSION: "8.12.0"
+    volumes:
+      - ./metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+
+  # elasticsearch:
+  #   container_name: elasticsearch
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+  #   ports:
+  #     - 9201:9200
+  #   environment:
+  #     - discovery.type=single-node
+
+  # kibana:
+  #   container_name: kibana
+  #   image: docker.elastic.co/kibana/kibana:7.14.0
+  #   ports:
+  #     - 5602:5601
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
