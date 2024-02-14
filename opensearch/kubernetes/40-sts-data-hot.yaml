@@ -1,0 +1,116 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: os-data-hot
+spec:
+  replicas: 3
+  serviceName: os-data-hot
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: os-data-hot
+  template:
+    metadata:
+      name: os-data-hot
+    spec:
+      terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      initContainers:
+        - name: fsgroup-volume
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+          args:
+            - chown -R 1000:1000 /usr/share/opensearch/data
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: opensearch-storage-pvc
+              mountPath: /usr/share/opensearch/data
+      containers:
+        - name: opensearch-cluster-manager
+          image: opensearchproject/opensearch:2.11.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1000
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            tcpSocket:
+              port: 9200
+            timeoutSeconds: 3
+          startupProbe:
+            failureThreshold: 30
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 9200
+            timeoutSeconds: 3
+          ports:
+            - name: http
+              containerPort: 9200
+            - name: transport
+              containerPort: 9300
+            - name: metrics
+              containerPort: 9600
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 100Mi
+            limits:
+              cpu: 1000m
+              memory: 100Mi
+          env:
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: network.host
+              value: "0.0.0.0"
+            - name: node.roles
+              value: data
+            - name: node.attr.temp
+              value: hot
+            - name: OPENSEARCH_JAVA_OPTS
+              value: -Xmx512M -Xms512M
+          volumeMounts:
+            - name: opensearch-storage-pvc
+              mountPath: /usr/share/opensearch/data
+            - name: opensearch-config-ref
+              subPath: opensearch.yml
+              mountPath: /usr/share/opensearch/config/opensearch.yml
+            - name: opensearch-config-ref
+              subPath: node-key.pem
+              mountPath: /usr/share/opensearch/config/root-ca.pem
+            - name: opensearch-config-ref
+              subPath: node-key.pem
+              mountPath: /usr/share/opensearch/config/node.pem
+            - name: opensearch-config-ref
+              subPath: node-key.pem
+              mountPath: /usr/share/opensearch/config/node-key.pem
+      volumes:
+        - name: opensearch-config-ref
+          configMap:
+            name: opensearch-config
+        - name: opensearch-secrets-ref
+          configMap:
+            name: opensearch-secrets
+  volumeClaimTemplates:
+    - metadata:
+        name: opensearch-storage-pvc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

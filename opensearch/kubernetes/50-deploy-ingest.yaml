@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: os-ingest
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: os-ingest
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: os-ingest
+    spec:
+      terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      initContainers:
+        - name: fsgroup-volume
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+          args:
+            - chown -R 1000:1000 /usr/share/opensearch/data
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: opensearch-storage-pvc
+              mountPath: /usr/share/opensearch/data
+      containers:
+        - name: opensearch-cluster-manager
+          image: opensearchproject/opensearch:2.11.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1000
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 5
+            tcpSocket:
+              port: 9200
+            timeoutSeconds: 3
+          startupProbe:
+            failureThreshold: 30
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 9200
+            timeoutSeconds: 3
+          ports:
+            - name: http
+              containerPort: 9200
+            - name: transport
+              containerPort: 9300
+            - name: metrics
+              containerPort: 9600
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 100Mi
+            limits:
+              cpu: 1000m
+              memory: 100Mi
+          env:
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: network.host
+              value: "0.0.0.0"
+            - name: node.attr.temp
+              value: warm
+            - name: OPENSEARCH_JAVA_OPTS
+              value: -Xmx512M -Xms512M
+          volumeMounts:
+            - name: opensearch-storage-pvc
+              mountPath: /usr/share/opensearch/data
+            - name: opensearch-config-cm-ref
+              subPath: opensearch.yml
+              mountPath: /usr/share/opensearch/config/opensearch.yml
+      volumes:
+        - name: opensearch-config-cm-ref
+          configMap:
+            name: opensearch-config
