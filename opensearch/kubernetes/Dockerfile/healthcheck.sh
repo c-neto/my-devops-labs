@@ -1,60 +1,64 @@
 #!/bin/bash
 #
-# >>> https://github.com/elastic/helm-charts/blob/main/elasticsearch/templates/statefulset.yaml#L238
+# This script checks the health status of an OpenSearch cluster and its node.
+# If the cluster is not yet ready, it waits for it to become ready.
+# Once the cluster is ready, it checks the health status of the local node.
+#
+# >>> reference: https://github.com/elastic/helm-charts/blob/main/elasticsearch/templates/statefulset.yaml#L238
 
 set -e
 
-# Exit if OPENSEARCH_PASSWORD in unset
-if [ -z "${OPENSEARCH_PASSWORD}" ]; then
-    echo "OPENSEARCH_PASSWORD variable is missing, exiting"
-    exit 1
-fi
+OPENSEARCH_USERNAME=
+OPENSEARCH_PASSWORD=
 
-# If the node is starting up wait for the cluster to be ready (request params: "{{ .Values.clusterHealthCheckParams }}" )
-# Once it has started only check that the node itself is responding
-START_FILE=/tmp/.es_start_file
+OPENSEARCH_CLUSTER_API_URL="https://svc-os-cluster-manager:9200"
+OPENSEARCH_NODE_API_URL="https://127.0.0.1:9200"
 
-# Disable nss cache to avoid filling dentry cache when calling curl
-# This is required with Elasticsearch Docker using nss < 3.52
-export NSS_SDB_USE_CACHE=no
+CHECKPOINT_FILE_OPENSEARCH_CLUSTER_HEALTHY=/tmp/.checkpoint_file_opensearch_cluster_healthy
 
-http () {
-    local path="${1}"
-    local args="${2}"
-    set -- -XGET -s
 
-    if [ "$args" != "" ]; then
-    set -- "$@" $args
-    fi
-
-    set -- "$@" -u "elastic:${OPENSEARCH_PASSWORD}"
-
-    curl --output /dev/null -k "$@" "https://127.0.0.1:9200${path}"
+# Function to check the health status of the OpenSearch cluster
+check_cluster_health_status() {
+  curl -XGET -k --fail --output /dev/null \
+    -u "${OPENSEARCH_USERNAME}:${OPENSEARCH_PASSWORD}" \
+    "$OPENSEARCH_CLUSTER_API_URL/_cluster/health?wait_for_status=green&timeout=1s"
 }
 
-if [ -f "${START_FILE}" ]; then
-    echo 'Elasticsearch is already running, lets check the node is healthy'
-    HTTP_CODE=$(http "/" "-w %{http_code}")
-    RC=$?
-    if [[ ${RC} -ne 0 ]]; then
-    echo "curl --output /dev/null -k -XGET -s -w '%{http_code}' \${BASIC_AUTH} https://127.0.0.1:9200/ failed with RC ${RC}"
-    exit ${RC}
-    fi
-    # ready if HTTP code 200
-    if [[ ${HTTP_CODE} == "200" ]]; then
-    exit 0
-    else
-    echo "curl --output /dev/null -k -XGET -s -w '%{http_code}' \${BASIC_AUTH} https://127.0.0.1:9200/ failed with HTTP code ${HTTP_CODE}"
-    exit 1
-    fi
+# Function to check the health status of the local OpenSearch node
+check_node_health_status() {
+  HTTP_CODE=$(
+    curl -XGET -k -s --fail --output /dev/null \
+      -w %{http_code} \
+      -u "${OPENSEARCH_USERNAME}:${OPENSEARCH_PASSWORD}" \
+      "$OPENSEARCH_NODE_API_URL"
+  )
 
-else
-    echo 'Waiting for elasticsearch cluster to become ready (request params: "{{ .Values.clusterHealthCheckParams }}" )'
-    if http "/_cluster/health?{{ .Values.clusterHealthCheckParams }}" "--fail" ; then
-    touch ${START_FILE}
+  if [[ "${HTTP_CODE}" == "200" ]]; then
+    echo "Node is healthy"
     exit 0
-    else
-    echo 'Cluster is not yet ready (request params: "{{ .Values.clusterHealthCheckParams }}" )'
+  else
+    echo "Node health check failed with HTTP code ${HTTP_CODE}"
     exit 1
-    fi
-fi
+  fi
+}
+
+main() {
+  # Check if OpenSearch is already running and then check the local node health
+  if [ -f "${CHECKPOINT_FILE_OPENSEARCH_CLUSTER_HEALTHY}" ]; then
+    echo "OpenSearch is already running, let's check the node health"
+    check_node_health_status
+  else
+    echo "OpenSearch cluster is ready, but node health check skipped (not yet running)"
+  fi
+
+  # Check if the OpenSearch cluster is already healthy
+  if check_cluster_health_status; then
+    touch "${CHECKPOINT_FILE_OPENSEARCH_CLUSTER_HEALTHY}"
+    echo "OpenSearch cluster is ready"
+  else
+    echo "Waiting for OpenSearch cluster to become ready"
+    exit 1
+  fi
+}
+
+main
