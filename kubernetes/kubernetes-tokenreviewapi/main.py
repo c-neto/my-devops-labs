@@ -8,8 +8,6 @@ import io
 import http
 
 
-
-
 app = Flask(__name__)
 
 #
@@ -21,7 +19,7 @@ app = Flask(__name__)
 
 KUBE_API_SERVER = "https://127.0.0.1:41753"
 KUBE_API_SERVER_TIMEOUT = 10
-KUBE_API_ROOT_CA = """"""
+KUBE_API_ROOT_CA = ""
 KUBE_API_TOKEN = ""
 
 
