@@ -21,4 +21,5 @@ jobs:
         run: |
           cat /etc/*release
           ls -lahrt
+          node --version
 
