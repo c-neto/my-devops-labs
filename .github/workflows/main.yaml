@@ -18,4 +18,4 @@ jobs:
           node-version: '18'
 
       - name: tests...
-        run: ls -lahrt
+        run: cat /etc/*release
