@@ -22,6 +22,9 @@ services:
       DB_USER: user
       DB_PASSWORD: password
       DB_JDBC_CONNECTION_STRING: jdbc:postgresql://postgres:5432/users_logs
+      # DB_JDBC_CONNECTION_STRING: jdbc:postgresql://postgres:5432/users_logs?ApplicationName=logstash&loginTimeout=10&socketTimeout=10&options=-c%20statement_timeout=5000%20-c%20lock_timeout=1000
+    ports:
+      - 8090:8090
     volumes:
       - ./logstash/pipeline:/usr/share/logstash/pipeline
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml

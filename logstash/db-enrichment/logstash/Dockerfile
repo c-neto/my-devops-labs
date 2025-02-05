@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash:8.11.2
+FROM docker.elastic.co/logstash/logstash:8.9.2
 
 WORKDIR /usr/share/logstash
 
