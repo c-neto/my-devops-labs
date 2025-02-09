@@ -3,6 +3,3 @@ up:
 
 down:
 	docker-compose down
-
-test:
-	./test.sh
