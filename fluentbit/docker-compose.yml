@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  log-generator:
+    container_name: log-generator
+    user: root
+    build:
+      context: log-generator
+    volumes:
+      - logs:/logs
+
+  fluentbit:
+    container_name: fluentbit
+    image: fluent/fluent-bit:latest
+    user: root
+    volumes:
+      - logs:/logs
+      - ./fluentbit/fluent-bit.conf:/fluent-bit/fluent-bit.conf
+    command:
+      - "fluent-bit"
+      - "-c"
+      - "/fluent-bit/fluent-bit.conf"
+
+  http-server:
+    container_name: http-server
+    user: root
+    build:
+      context: http-server
+
+volumes:
+  logs:
