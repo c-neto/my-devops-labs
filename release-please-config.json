@@ -1,0 +1,25 @@
+{
+  "packages": {
+    "ansible": {},
+    "blog/2023-11-12": {},
+    "blog/2023-11-19": {},
+    "computer-network/OpenVPN": {},
+    "computer-network/VLAN": {},
+    "computer-network/Zabbix-via-SNMP": {},
+    "file-server": {},
+    "fluentbit": {},
+    "grafana-stack": {},
+    "haproxy": {},
+    "kubernetes": {},
+    "log-web-viewer": {},
+    "logstash": {},
+    "loki": {},
+    "minio": {},
+    "nginx": {},
+    "opensearch": {},
+    "packer": {},
+    "rpm-packaging-copr": {},
+    "tls-ssl": {},
+    "zabbix": {}
+  }
+}
