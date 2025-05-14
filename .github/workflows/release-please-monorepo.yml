@@ -1,0 +1,51 @@
+# This workflow uses release-please to automate changelog and release PRs for each subdirectory in a monorepo.
+# It runs when a new tag is created, and updates changelogs for each package.
+
+name: release-please-monorepo
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run release-please for each package
+        uses: googleapis/release-please-action@v4
+        with:
+          monorepo-tags: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # List each subdirectory you want to manage as a package
+          # Add or remove entries as needed for your monorepo structure
+          packages: |
+            ansible
+            blog/2023-11-12
+            blog/2023-11-19
+            computer-network/OpenVPN
+            computer-network/VLAN
+            computer-network/Zabbix-via-SNMP
+            file-server
+            fluentbit
+            grafana-stack
+            haproxy
+            kubernetes
+            log-web-viewer
+            logstash
+            loki
+            minio
+            nginx
+            opensearch
+            packer
+            rpm-packaging-copr
+            tls-ssl
+            zabbix
