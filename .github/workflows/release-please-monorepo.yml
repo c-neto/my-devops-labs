@@ -28,31 +28,6 @@ jobs:
       - name: Run release-please for each package
         uses: googleapis/release-please-action@v4
         with:
-          monorepo-tags: true
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          # List each subdirectory you want to manage as a package
-          # Add or remove entries as needed for your monorepo structure
-          packages: |
-            ansible
-            blog/2023-11-12
-            blog/2023-11-19
-            computer-network/OpenVPN
-            computer-network/VLAN
-            computer-network/Zabbix-via-SNMP
-            file-server
-            fluentbit
-            grafana-stack
-            haproxy
-            kubernetes
-            log-web-viewer
-            logstash
-            loki
-            minio
-            nginx
-            opensearch
-            packer
-            rpm-packaging-copr
-            tls-ssl
-            zabbix
