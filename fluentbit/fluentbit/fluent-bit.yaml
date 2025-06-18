@@ -1,0 +1,30 @@
+# service:
+#   flush: 1
+#   log_level: info
+#   storage:
+#     path: /logs/fluent-bit-storage
+#     sync: full
+
+pipeline:
+  inputs:
+    - name: tail
+      path: /logs/*.log
+      storage:
+        type: filesystem
+      processors:
+        logs:
+          - name: modify
+            copy: log log_hash
+          - name: content_modifier
+            action: hash
+            key: log_hash
+  outputs:
+    - name: http
+      match: "*"
+      host: http-server
+      port: 5000
+      uri: /logs
+      format: json
+      retry_limit: false
+    - name: stdout
+      match: "*"

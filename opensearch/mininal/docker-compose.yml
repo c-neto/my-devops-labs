@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  opensearch:
+    container_name: opensearch
+    build:
+      context: opensearch/
+      args:
+        TAG_VERSION: "3.0.0"
+    volumes:
+      - type: bind
+        source: ./opensearch/opensearch.yml
+        target: /usr/share/opensearch/config/opensearch.yml
+    ports:
+      - 9200:9200
+    environment:
+      TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+
+  opensearch-dashboards:
+    container_name: opensearch-dashboards
+    build:
+      context: opensearch-dashboards/
+      args:
+        TAG_VERSION: "3.0.0"
+    volumes:
+      - type: bind
+        source: ./opensearch-dashboards/opensearch_dashboards.yml
+        target: /usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+        read_only: true
+    ports:
+      - 5601:5601
+    environment:
+      TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      LS_JAVA_OPTS: "-Xmx1g -Xms256m"
+    depends_on:
+      - opensearch
