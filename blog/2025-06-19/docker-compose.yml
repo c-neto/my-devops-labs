@@ -4,11 +4,11 @@ services:
     image: fluent/fluent-bit:latest
     user: root
     volumes:
-      - ./fluentbit/fluent-bit.yaml:/fluent-bit/fluent-bit.yaml
+      - ./fluent-bit.yaml:/fluent-bit/fluent-bit.yaml
     develop:
       watch:
         - action: sync+restart
-          path: ./fluentbit/
+          path: ./
           target: /fluentbit/
     command:
       - "fluent-bit"
