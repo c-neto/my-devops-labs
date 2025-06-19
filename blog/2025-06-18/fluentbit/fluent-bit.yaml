@@ -1,0 +1,22 @@
+service:
+  flush: 1
+  log_level: error
+
+
+pipeline:
+  inputs:
+    - name: dummy
+      dummy: '{"message": "custom dummy"}'
+      tag: dummy.sample
+      processors:
+        logs:
+          - name: modify
+            copy: message log_hash
+
+          - name: content_modifier
+            action: hash
+            key: log_hash
+
+  outputs:
+    - name: stdout
+      match: "dummy.sample"
