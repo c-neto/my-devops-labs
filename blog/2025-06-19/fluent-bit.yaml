@@ -2,6 +2,9 @@ service:
   flush: 1                # Flush records every second. Controls how often data is pushed to outputs.
   log_level: error        # Only log errors. Reduces log verbosity for Fluent Bit itself.
 
+# The `pipeline.inputs.processors` feature is only available when using the `yaml` configuration format.  
+# It is not supported in the legacy `.conf` configuration format.
+
 pipeline:
   inputs:
     - name: dummy
