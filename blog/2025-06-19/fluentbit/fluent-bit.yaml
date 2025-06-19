@@ -1,0 +1,39 @@
+service:
+  flush: 1                # Flush records every second. Controls how often data is pushed to outputs.
+  log_level: error        # Only log errors. Reduces log verbosity for Fluent Bit itself.
+
+pipeline:
+  inputs:
+    - name: dummy
+      dummy: '{"message": "2025-06-19T17:02:35.123456789Z stdout F This is a Foobar application log sample running in kubernetes persisted on /var/log/containers/*.log"}'
+      tag: dummy.foobar
+      processors:
+        logs:
+          # Copy the 'message' field to a new field called '_id'.
+          - name: modify
+            copy: message _id
+
+          # Hash the '_id' field to anonymize or deduplicate.
+          - name: content_modifier
+            action: hash
+            key: _id
+
+    - name: dummy
+      dummy: '{"message": "2025-06-19T17:02:35.123456789Z stdout F This is a Greeting application log sample running in kubernetes persisted on /var/log/containers/*.log"}'
+      tag: dummy.greeting 
+      processors:
+        logs:
+          # Copy the 'message' field to a new field called '_id'.
+          - name: modify
+            copy: message _id
+
+          # Hash the '_id' field to anonymize or deduplicate.
+          - name: content_modifier
+            action: hash
+            key: _id
+
+  outputs:
+    - name: stdout
+      format: json_lines
+      match: "dummy.*"
+
