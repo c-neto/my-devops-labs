@@ -38,5 +38,12 @@ pipeline:
   outputs:
     - name: stdout
       format: json_lines
-      match: "dummy.*"
+      match: dummy.*
 
+    # - name: opensearch
+    #   host: opensearch.example.com
+    #   index: my-log-index
+    #   write_operation: index
+    #   id_key: _id
+    #   generate_id: off
+    #   match: dummy.*
