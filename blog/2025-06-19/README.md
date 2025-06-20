@@ -1,5 +1,10 @@
 # Fluent Bit Log Hashing Example
 
+> [!NOTE]  
+> This lab is part of the blog post:
+> - https://carlosneto.dev/blog/2025/2025-06-19-fluentbit-log-dedup/
+
+
 This lab demonstrates how to use Fluent Bit to process log lines, generate a hash for each log entry, and output the results. This is useful for anonymizing or deduplicating logs, especially in Kubernetes environments where logs are persisted in `/var/log/containers/*.log`.
 
 ```bash
