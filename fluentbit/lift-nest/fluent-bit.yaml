@@ -1,0 +1,51 @@
+service:
+  flush: 1                # Flush records every second. Controls how often data is pushed to outputs.
+  log_level: error        # Only log errors. Reduces log verbosity for Fluent Bit itself.
+
+# The `pipeline.inputs.processors` feature is only available when using the `yaml` configuration format.  
+# It is not supported in the legacy `.conf` configuration format.
+
+pipeline:
+  inputs:
+    - name: dummy
+      dummy: |
+        {
+          "foo" : "bar",
+          "x": "123"
+        }
+      tag: dummy.foobar
+      processors:
+        logs:
+          - name: modify
+            add:
+              - kubernetes.pod  foobar-pod
+              - kubernetes.node foobar-node
+
+          - name: nest
+            operation: nest
+            nest_under: app
+            wildcard: "*"
+
+          - name: lua
+            code: |
+              function main(tag, timestamp, record)
+                for k, v in pairs(record["app"]) do
+                  if k:find("kubernetes%.") == 1 then
+                    record[k] = v
+                    record["app"][k] = nil
+                  end
+                end
+                return 1, timestamp, record
+              end
+            call: main
+
+          - name: nest
+            operation: nest
+            nest_under: kubernetes
+            wildcard: "kubernetes.*"
+            remove_prefix: kubernetes.
+
+  outputs:
+    - name: stdout
+      format: json_lines
+      match: dummy.*
