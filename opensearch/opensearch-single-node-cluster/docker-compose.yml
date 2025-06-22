@@ -1,0 +1,31 @@
+services:
+
+  opensearch:
+    container_name: opensearch
+    build:
+      context: opensearch/
+      args:
+        TAG_VERSION: "3.0.0"
+    volumes:
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro
+    network_mode: host
+    environment:
+      TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "B'*~/~=[y5Rqxm!Yo>?P:'5Ia~n/[3eD"
+
+  opensearch-dashboards:
+    container_name: opensearch-dashboards
+    build:
+      context: opensearch-dashboards/
+      args:
+        TAG_VERSION: "3.0.0"
+    volumes:
+      - ./opensearch-dashboards/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+    network_mode: host
+    environment:
+      TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+    depends_on:
+      - opensearch
