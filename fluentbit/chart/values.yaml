@@ -1,0 +1,93 @@
+# https://github.com/bitnami/charts/blob/main/bitnami/fluent-bit/values.yaml
+
+nameOverride: "fluent-bit"
+
+daemonset:
+  enabled: true
+  hostPaths:
+    logs: /var/log
+    containerLogs: /var/lib/docker/containers
+    machineId: /etc/machine-id
+
+serviceAccount:
+  create: true
+  name: ""
+  automountServiceAccountToken: false
+
+rbac:
+  create: true
+  nodeAccess: true
+
+config:
+  flush: 1
+  logLevel: info
+
+  service: |
+    [SERVICE]
+        Flush        {{ .Values.config.flush }}
+        Daemon       Off
+        Log_Level    {{ .Values.config.logLevel }}
+        Config_Watch On
+        HTTP_Server  On
+        HTTP_Listen  0.0.0.0
+        HTTP_Port    {{ .Values.containerPorts.http }}
+        Parsers_File /opt/bitnami/fluent-bit/conf/parsers.conf
+        Parsers_File /opt/bitnami/fluent-bit/conf/custom_parsers.conf
+
+  inputs: |
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        Parser            docker
+        Tag               kube.*
+        Refresh_Interval  5
+
+  filters: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Keep_Log            Off
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+
+    [FILTER]
+        Name                modify
+        Match               kube.*
+        Remove              log
+
+  outputs: |
+    [OUTPUT]
+        Name  stdout
+        Match *
+        Format json_lines
+
+  customParsers: {}
+
+  extraFiles: {}
+
+
+# {
+#     "date": 1750631949.290122,
+#     "kubernetes": {
+#         "pod_name": "release-name-fluent-bit-zscfg",
+#         "namespace_name": "default",
+#         "pod_id": "98dfa868-341a-419d-8e10-b0ac060be9e3",
+#         "labels": {
+#             "app.kubernetes.io/instance": "release-name",
+#             "app.kubernetes.io/managed-by": "Helm",
+#             "app.kubernetes.io/name": "fluent-bit",
+#             "app.kubernetes.io/part-of": "fluent-bit",
+#             "app.kubernetes.io/version": "4.0.3",
+#             "controller-revision-hash": "67c77c8488",
+#             "helm.sh/chart": "fluent-bit-3.1.5",
+#             "pod-template-generation": "10"
+#         },
+#         "annotations": {
+#             "checksum/config": "c30f16178423f9ffa67e96c33d88aa0f3d934d4b5f5818cbdc8dc584ec2fb59b"
+#         },
+#         "host": "kind-control-plane",
+#         "container_name": "fluent-bit",
+#         "docker_id": "871192eead3f914e44d6129ea9ed51a40c580a25fdca71dd0a54721f35c3b072",
+#         "container_image": "docker.io/bitnami/fluent-bit:4.0.3-debian-12-r0"
+#     }
+# }

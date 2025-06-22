@@ -1,0 +1,314 @@
+---
+# Source: fluent-bit/templates/networkpolicy.yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: example-fluent-bit
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 4.0.3
+    helm.sh/chart: fluent-bit-3.1.5
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: example
+      app.kubernetes.io/name: fluent-bit
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: 2020
+---
+# Source: fluent-bit/templates/service-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name:  example-fluent-bit
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 4.0.3
+    helm.sh/chart: fluent-bit-3.1.5
+    app.kubernetes.io/part-of: fluent-bit
+automountServiceAccountToken: false
+---
+# Source: fluent-bit/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example-fluent-bit-config
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 4.0.3
+    helm.sh/chart: fluent-bit-3.1.5
+    app.kubernetes.io/part-of: fluent-bit
+data:
+  custom_parsers.conf: |
+    {}
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        1
+        Daemon       Off
+        Log_Level    info
+        Config_Watch On
+        HTTP_Server  On
+        HTTP_Listen  0.0.0.0
+        HTTP_Port    2020
+        Parsers_File /opt/bitnami/fluent-bit/conf/parsers.conf
+        Parsers_File /opt/bitnami/fluent-bit/conf/custom_parsers.conf
+    
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        Parser            docker
+        Tag               kube.*
+        Refresh_Interval  5
+    
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Keep_Log            Off
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+    
+    [FILTER]
+        Name                modify
+        Match               kube.*
+        Remove              log
+    
+    [OUTPUT]
+        Name  stdout
+        Match *
+        Format json_lines
+---
+# Source: fluent-bit/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: example-fluent-bit
+  labels:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 4.0.3
+    helm.sh/chart: fluent-bit-3.1.5
+    app.kubernetes.io/part-of: fluent-bit
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - nodes
+      - nodes/proxy
+    verbs:
+      - get
+      - list
+      - watch
+---
+# Source: fluent-bit/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: example-fluent-bit
+  labels:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 4.0.3
+    helm.sh/chart: fluent-bit-3.1.5
+    app.kubernetes.io/part-of: fluent-bit
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: example-fluent-bit
+subjects:
+  - kind: ServiceAccount
+    name: example-fluent-bit
+    namespace: "default"
+---
+# Source: fluent-bit/templates/service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name:  example-fluent-bit
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 4.0.3
+    helm.sh/chart: fluent-bit-3.1.5
+    app.kubernetes.io/part-of: fluent-bit
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+    - name: http
+      port: 2020
+      targetPort: 2020
+      nodePort: null
+  selector:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/part-of: fluent-bit
+---
+# Source: fluent-bit/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: example-fluent-bit
+  namespace: "default"
+  labels:
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 4.0.3
+    helm.sh/chart: fluent-bit-3.1.5
+    app.kubernetes.io/part-of: fluent-bit
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: example
+      app.kubernetes.io/name: fluent-bit
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: example
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: fluent-bit
+        app.kubernetes.io/version: 4.0.3
+        helm.sh/chart: fluent-bit-3.1.5
+        app.kubernetes.io/part-of: fluent-bit
+      annotations:
+        checksum/config: f428c47521ebe7735065fdfe24283e115f91edf074b3e875b9725c7ba3dc6d4e
+    spec:
+      
+      serviceAccountName: example-fluent-bit
+      securityContext:
+        fsGroup: 0
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: example
+                    app.kubernetes.io/name: fluent-bit
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      priorityClassName: ""
+      automountServiceAccountToken: true
+      initContainers:
+      containers:
+        - name: fluent-bit
+          image: docker.io/bitnami/fluent-bit:4.0.3-debian-12-r0
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: http
+              containerPort: 2020
+          env:
+          envFrom:
+          startupProbe:
+            failureThreshold: 15
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            httpGet:
+              port: http
+              path: /api/v1/health
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            tcpSocket:
+              port: http
+          readinessProbe:
+            failureThreshold: 15
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            httpGet:
+              port: http
+              path: /api/v1/health
+          resources:
+            limits:
+              cpu: 150m
+              ephemeral-storage: 2Gi
+              memory: 192Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 50Mi
+              memory: 128Mi
+          volumeMounts:
+            - name: config
+              mountPath: /opt/bitnami/fluent-bit/conf/fluent-bit.conf
+              subPath: fluent-bit.conf
+            - name: config
+              mountPath: /opt/bitnami/fluent-bit/conf/custom_parsers.conf
+              subPath: custom_parsers.conf
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: etcmachineid
+              mountPath: /etc/machine-id
+              readOnly: true
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: example-fluent-bit-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: etcmachineid
+          hostPath:
+            path: /etc/machine-id
+            type: File
