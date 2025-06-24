@@ -1,0 +1,47 @@
+service:
+  flush: 1
+  log_level: error
+
+pipeline:
+  inputs:
+    - name: dummy
+      tag: dummy
+      samples: 3
+      dummy: |
+        {
+          "date": 1750716865.516016,
+          "message": "foobar"
+        }
+
+
+  outputs:
+    - name: stdout
+      format: json_lines
+      match: dummy
+
+    # # logs will be duplicated
+    # - name: opensearch
+    #   match: dummy
+    #   host: opensearch
+    #   port: 9200
+    #   index: dummy
+    #   write_operation: index
+    #   suppress_type_name: true
+    #   time_key: date
+    #   trace_output: true
+    #   trace_error: true
+    #   id_key: log_hash
+
+    # logs doesnt not will be duplicated
+    - name: opensearch
+      match: dummy
+      host: opensearch
+      port: 9200
+      index: dummy
+      write_operation: index
+      suppress_type_name: true
+      time_key: date
+      trace_output: true
+      trace_error: true
+      generate_id: true
+
