@@ -1,0 +1,74 @@
+service:
+  log_level: trace
+
+pipeline:
+  inputs:
+    - name: dummy
+      tag: dummy
+      dummy: |
+        {"stream": "stdout"}
+      processors:
+        logs:
+          # this field is added, because the condition rule met
+          - name: content_modifier
+            action: insert
+            key: field_add_only_if_stream_is_stdout
+            value: foobar
+            condition:
+              op: and
+              rules:
+                - field: $stream
+                  op: eq
+                  value: stdout
+
+          # the field is not added, because the condition rule is not met
+          - name: content_modifier
+            action: insert
+            key: field_add_only_if_stream_is_stderr
+            value: foobar
+            condition:
+              op: and
+              rules:
+                - field: $stream
+                  op: eq
+                  value: stderr
+
+          # >>> BUG: the field is always added, ignoring the condition rule
+          - name: lua
+            call: main
+            code: |
+              function main(tag, timestamp, record)
+                record["field_add_by_lua_if_stream_is_stderr"] = "BUG_DETECTED"
+                return 1, timestamp, record
+              end
+            condition:
+              op: and
+              rules:
+                - field: $stream
+                  op: eq
+                  value: stderr
+
+          # >>> BUG: the field is always added, ignoring the condition rule
+          - name: modify
+            match: '*'
+            add:
+              - field_add_by_modify_filter_if_stream_is_stderr BUG_DETECTED
+            condition:
+              op: and
+              rules:
+                - field: $stream
+                  op: eq
+                  value: stderr
+
+  outputs:
+    - name: stdout
+      format: json_lines
+      match: "*"
+
+# {
+#   "date": 1751412593.244093,
+#   "stream": "stdout",
+#   "field_add_only_if_stream_is_stdout": "foobar",
+#   "field_add_by_lua_if_stream_is_stderr": "BUG_DETECTED",
+#   "field_add_by_modify_filter_if_stream_is_stderr": "BUG_DETECTED"
+# }

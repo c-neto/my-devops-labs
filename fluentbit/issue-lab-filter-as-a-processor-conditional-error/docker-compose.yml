@@ -1,0 +1,15 @@
+services:
+  fluentbit:
+    container_name: fluentbit
+    image: fluent/fluent-bit:4.0.3
+    volumes:
+      - ./fluent-bit.yaml:/fluent-bit/fluent-bit.yaml
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./fluent-bit.yaml
+          target: /fluent-bit/fluent-bit.yaml
+    command:
+      - "fluent-bit"
+      - "-c"
+      - "/fluent-bit/fluent-bit.yaml"
